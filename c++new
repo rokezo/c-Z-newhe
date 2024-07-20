@@ -1,0 +1,105 @@
+#include <iostream>
+
+template <typename T>
+class PriorityQueue {
+private:
+    struct Node {
+        int priority;
+        T element;
+        Node* next;
+    };
+
+    Node* head;
+
+public:
+    PriorityQueue() : head(nullptr) {}
+
+    ~PriorityQueue() {
+        while (head) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+
+    bool IsEmpty() const {
+        return head == nullptr;
+    }
+
+    bool IsFull() const {
+        return false; // Priority queue can grow dynamically, so it's never full
+    }
+
+    void InsertWithPriority(int priority, const T& element) {
+        Node* newNode = new Node;
+        newNode->priority = priority;
+        newNode->element = element;
+        newNode->next = nullptr;
+
+        if (IsEmpty() || priority > head->priority) {
+            newNode->next = head;
+            head = newNode;
+        } else {
+            Node* current = head;
+            while (current->next && current->next->priority >= priority) {
+                current = current->next;
+            }
+            newNode->next = current->next;
+            current->next = newNode;
+        }
+    }
+
+    T PullHighestPriorityElement() {
+        if (IsEmpty()) {
+            throw std::runtime_error("Queue is empty");
+        }
+        T element = head->element;
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+        return element;
+    }
+
+    T Peek() const {
+        if (IsEmpty()) {
+            throw std::runtime_error("Queue is empty");
+        }
+        return head->element;
+    }
+
+    size_t GetSize() const {
+        size_t size = 0;
+        Node* current = head;
+        while (current) {
+            size++;
+            current = current->next;
+        }
+        return size;
+    }
+
+    void Show() const {
+        Node* current = head;
+        while (current) {
+            std::cout << "Priority: " << current->priority << ", Element: " << current->element << std::endl;
+            current = current->next;
+        }
+    }
+};
+
+int main() {
+    PriorityQueue<int> queue;
+
+    queue.InsertWithPriority(3, 10);
+    queue.InsertWithPriority(1, 20);
+    queue.InsertWithPriority(2, 30);
+
+    std::cout << "Queue size: " << queue.GetSize() << std::endl;
+    queue.Show();
+
+    std::cout << "Highest priority element: " << queue.Peek() << std::endl;
+
+    int pulledElement = queue.PullHighestPriorityElement();
+    std::cout << "Pulled element: " << pulledElement << std::endl;
+
+    return 0;
+}
